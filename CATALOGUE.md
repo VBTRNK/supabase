@@ -1611,3 +1611,17 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   **Rollback:** if needed, restore `price = 175` for `slug = 'tfh-pack'` only
   while the row still has `price = 250`; use a separately reviewed migration.
   Historical openings and ledger entries are left intact.
+
+- `20261020000000_midweek_club_names.sql` (**catalogued, not yet applied**;
+  KUT PR #271, ADR-145, Midweek Madness 3.0 S2). Re-creates the four Midweek
+  views that name a member word for word and appends each member's club name
+  (`side_0_club`/`side_1_club` on `midweek_matches_public` and
+  `midweek_draw_public`, `club_name` on `midweek_entries_public`,
+  `champion_club` on `midweek_tournaments_public`), defaulting to
+  "<name>'s Club". Gates, definer, security barrier and grants unchanged.
+  **Tier: additive** (views only, columns appended; no table, function or row
+  changes). **Rollback:** re-create the four views from their previous
+  migrations (named in the file's header), dropping each first since a view
+  cannot lose a column, and re-apply grants and comments. Applied through the
+  `apply-migrations` workflow (ADR-144); evidence goes in the applied entry.
+  The SQL is byte-for-byte from KUT and is checked by `verify-catalog.ps1`.
