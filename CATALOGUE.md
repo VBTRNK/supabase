@@ -1612,16 +1612,25 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   while the row still has `price = 250`; use a separately reviewed migration.
   Historical openings and ledger entries are left intact.
 
-- `20261020000000_midweek_club_names.sql` (**catalogued, not yet applied**;
-  KUT PR #271, ADR-145, Midweek Madness 3.0 S2). Re-creates the four Midweek
-  views that name a member word for word and appends each member's club name
+- `20261020000000_midweek_club_names.sql` (**applied 2026-10-11**; KUT PR
+  #271 / ADR-145, catalogue PR #84). Re-creates the four Midweek views that
+  name a member word for word and appends each member's club name
   (`side_0_club`/`side_1_club` on `midweek_matches_public` and
   `midweek_draw_public`, `club_name` on `midweek_entries_public`,
   `champion_club` on `midweek_tournaments_public`), defaulting to
   "<name>'s Club". Gates, definer, security barrier and grants unchanged.
-  **Tier: additive** (views only, columns appended; no table, function or row
-  changes). **Rollback:** re-create the four views from their previous
-  migrations (named in the file's header), dropping each first since a view
-  cannot lose a column, and re-apply grants and comments. Applied through the
-  `apply-migrations` workflow (ADR-144); evidence goes in the applied entry.
-  The SQL is byte-for-byte from KUT and is checked by `verify-catalog.ps1`.
+  **Tier: additive** (views only, columns appended).
+  **Application:** the first real run of the `apply-migrations` workflow
+  (ADR-144), run 38155827216, catalogue `main`
+  `7fa137a07e4646a140b4a98110b2d0a07018c5b0`, KUT ref
+  `8cafe9d8e1bf9b6e04631c3d3b68ed1c5546bfdc`. The approved plan named only
+  this file (sha256 `5af05887...40ac61`, matching KUT); the owner approved the
+  plan and the apply.
+  **Backup:** KUT backup run 38155567946 finished at `2026-10-11T16:31Z`,
+  three minutes before the push.
+  **After:** the workflow found the remote up to date, nothing pending.
+  Hosted smoke query (as `service_role`): 62 visible matches, zero rows
+  without a club in any of the four views. KUT PR #271 merged afterwards
+  (`0272d3facb4a14d5103d53853e6830e4701b193f`).
+  **Rollback:** re-create the four views from their previous migrations (named
+  in the file's header), dropping each first, and re-apply grants and comments.
