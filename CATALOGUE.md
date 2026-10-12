@@ -1634,3 +1634,25 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   (`0272d3facb4a14d5103d53853e6830e4701b193f`).
   **Rollback:** re-create the four views from their previous migrations (named
   in the file's header), dropping each first, and re-apply grants and comments.
+
+- `20261021000000_active_member_base_reads.sql` (**prepared, not yet applied**;
+  KUT issue #286, ADR-152). Requires `kut.is_active_member()` on 31 ungated
+  member-readable base tables through restrictive SELECT policies, preserving
+  their existing row scopes and grants. The private `player-photos` SELECT
+  policy gains the same gate; other buckets and photo writes are unchanged.
+  Own-profile reads remain for login's disabled-account check; admin-only
+  reads and already-gated tables are unchanged. Definer views retain owner
+  rights and gates; active admins and service role retain intended access.
+  **Tier: additive, access-only** (policies only; no DML, grants or view changes).
+  **Local evidence:** KUT's 212 focused assertions plus existing projection and
+  rating-rule tests pass (310 total); fast verification passes (598 unit tests).
+  Full pgTAP on a fresh isolated local stack: 1866/1866 pass (40 files).
+  The existing reused stack has two failures (injury notice, Chronicle weekly
+  goals), also present with old policies: current-week data violates those
+  fixtures' assumptions. The same unchanged tests pass on the fresh stack.
+  Hosted policy parity/exposure is unverified; no hosted changes made.
+  **Rollback:** drop the new restrictive policy on the migration's listed
+  tables and restore the player-photo SELECT predicate to its bucket check.
+  The SQL is byte-identical to KUT. Publish/merge the catalogue PR before KUT's
+  parity rerun, then apply only through ADR-144's separately approved workflow
+  with a fresh backup. An access change still needs a member page smoke.
