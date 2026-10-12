@@ -1635,8 +1635,9 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   **Rollback:** re-create the four views from their previous migrations (named
   in the file's header), dropping each first, and re-apply grants and comments.
 
-- `20261021000000_active_member_base_reads.sql` (**prepared, not yet applied**;
-  KUT issue #286, ADR-152). Requires `kut.is_active_member()` on 31 ungated
+- `20261021000000_active_member_base_reads.sql` (**applied 2026-10-12**;
+  KUT PR #292 / issue #286, ADR-152; catalogue PR #88). Requires
+  `kut.is_active_member()` on 31 ungated
   member-readable base tables through restrictive SELECT policies, preserving
   their existing row scopes and grants. The private `player-photos` SELECT
   policy gains the same gate; other buckets and photo writes are unchanged.
@@ -1650,9 +1651,24 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   The existing reused stack has two failures (injury notice, Chronicle weekly
   goals), also present with old policies: current-week data violates those
   fixtures' assumptions. The same unchanged tests pass on the fresh stack.
-  Hosted policy parity/exposure is unverified; no hosted changes made.
+  **Application:** owner-approved `apply-migrations` run
+  [38227966186](https://github.com/VibeTrunk/supabase/actions/runs/38227966186),
+  catalogue main `cc5cbb4da4a7f4e066dfb122ed844d3546bf38b1`, tested KUT head
+  `aa516c87f14c75913774d051fff5d80974b3a6c8`. Only this file was pending;
+  the apply job rechecked the approved list and pushed it at `09:28:15Z`.
+  SHA-256 `0b631a9716828e9ac25699a1e34e7a6c5a98d0b4f6d0e23fcb1151cd6d5847fe`
+  matches the tested SQL bytes. The post-push check found nothing pending.
+  **Backup:** [38227500063](https://github.com/VibeTrunk/kut/actions/runs/38227500063)
+  passed its independent restore check and finished at `09:07:19Z`; the apply
+  job verified its age was 20 minutes. Encrypted artifact:
+  `kut-backup-20261012T090447Z`.
+  **Member smoke:** after KUT #292 merged as
+  `e99fa0b656ac29a72aabee4903a292884bbb9e93` and production deployed that SHA,
+  the owner reported all checks passed as a normal active member: Players,
+  player detail/history/photo, Chronicle attendance/finalized results, and
+  own Collection. No hosted fixtures were created and no member data printed.
+  Direct hosted denial probes were not run; local pgTAP covers them.
   **Rollback:** drop the new restrictive policy on the migration's listed
   tables and restore the player-photo SELECT predicate to its bucket check.
-  The SQL is byte-identical to KUT. Publish/merge the catalogue PR before KUT's
-  parity rerun, then apply only through ADR-144's separately approved workflow
-  with a fresh backup. An access change still needs a member page smoke.
+  The SQL is byte-identical to KUT. Application followed ADR-144's reviewed
+  central workflow; rollback remains separately authorized and was not run.
