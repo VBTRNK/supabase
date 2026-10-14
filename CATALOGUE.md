@@ -1672,3 +1672,22 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   tables and restore the player-photo SELECT predicate to its bucket check.
   The SQL is byte-identical to KUT. Application followed ADR-144's reviewed
   central workflow; rollback remains separately authorized and was not run.
+
+- `20261022000000_safe_hands.sql` (**pending**, not applied; KUT PR #316,
+  frontend #315 / issue #264, ADR-162). New surveys snapshot three rotating
+  categories plus Safe Hands last; existing open/finalized ballots stay unchanged.
+  Safe Hands may repeat a regular nominee. One outright leader across both teams
+  wins with at least two submitted nominators and three submitted kudos reporters;
+  ties get nothing. Ordinary kudos scoring, G+A, fading, caps and rewards remain.
+  **Tier: data-changing, conservatively** (ballot constraints/Form recognition
+  semantics; no historical backfill, rating rebuild or existing row rewrite).
+  **Evidence:** 30 focused pgTAP assertions pass; combined KUT fast verification
+  passes (612 tests). The reused local stack has the same two pre-existing
+  failures with and without this migration: injury notice and Chronicle weekly
+  goals; fresh KUT CI remains required. Copies are byte-identical.
+  **Application/backup/smoke:** pending owner-reviewed workflow plan, fresh
+  independently verified backup and production-environment approvals. Merge and
+  deploy tolerant frontend #315 first; this catalogue entry does not apply SQL.
+  **Rollback:** use a reviewed forward fix preserving recorded four-slot ballots
+  and nominations. Do not remove Safe Hands or restore the old unique-recipient
+  constraint once duplicate regular/keeper nominations exist.
