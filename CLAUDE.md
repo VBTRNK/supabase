@@ -33,8 +33,8 @@ Every catalogued migration, with its tier, backup, pre- and post-push
 [`CATALOGUE.md`](CATALOGUE.md). Add new entries there, never here, so this
 file stays orientation.
 
-**Latest applied migration:** KUT's `20261021000000_active_member_base_reads.sql`
-(catalogue PR #88), applied 2026-10-12 by the `apply-migrations` workflow;
+**Latest applied migration:** KUT's `20261022000000_safe_hands.sql`
+(catalogue PR #90), applied 2026-10-14 by the `apply-migrations` workflow;
 nothing pending afterwards. Verification and rollback: CATALOGUE.md.
 
 ## Repo status
