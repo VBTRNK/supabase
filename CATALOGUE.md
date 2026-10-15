@@ -1673,7 +1673,7 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   The SQL is byte-identical to KUT. Application followed ADR-144's reviewed
   central workflow; rollback remains separately authorized and was not run.
 
-- `20261022000000_safe_hands.sql` (**pending**, not applied; KUT PR #316,
+- `20261022000000_safe_hands.sql` (**applied** 2026-10-14; KUT PR #316,
   frontend #315 / issue #264, ADR-162). New surveys snapshot three rotating
   categories plus Safe Hands last; existing open/finalized ballots stay unchanged.
   Safe Hands may repeat a regular nominee. One outright leader across both teams
@@ -1685,9 +1685,40 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   passes (612 tests). The reused local stack has the same two pre-existing
   failures with and without this migration: injury notice and Chronicle weekly
   goals; fresh KUT CI remains required. Copies are byte-identical.
-  **Application/backup/smoke:** pending owner-reviewed workflow plan, fresh
-  independently verified backup and production-environment approvals. Merge and
-  deploy tolerant frontend #315 first; this catalogue entry does not apply SQL.
+  **Application:** owner-approved `apply-migrations` run
+  [38647294212](https://github.com/VibeTrunk/supabase/actions/runs/38647294212),
+  catalogue main `655a3112ff0a845a89a2dd7bbabd5cacd14b74f0`, tested KUT head
+  `6fb3d3cc221f6f07aec0655d2b6c4692296bed2d`. Only this file was pending; it
+  was pushed at `22:28:17Z` with SHA-256
+  `cb920be99b4b25e6fcaad039783839e45d92cae661d41462e5d9801ba8d25101`, and the
+  post-push plan found nothing pending.
+  **Backup:** [38646881824](https://github.com/VibeTrunk/kut/actions/runs/38646881824),
+  five minutes old at the apply. **Smoke:** none recorded. This entry was
+  completed late, from the workflow logs, in the `20261023000000` catalogue PR.
   **Rollback:** use a reviewed forward fix preserving recorded four-slot ballots
   and nominations. Do not remove Safe Hands or restore the old unique-recipient
   constraint once duplicate regular/keeper nominations exist.
+
+- `20261023000000_pack_tiers.sql` (**pending**, not applied; KUT PR #321,
+  issue #223 S1, ADR-164). Regular, Silver and Gold packs on one canonical Live
+  draw pool (`kut.pack_draw_pool()`), shared by `open_pack` and admin metrics.
+  Silver (500, at least 1 Silver+) and Gold (750, at least 1 Gold+) restrict
+  only their last card, and only when no earlier card met the floor; an empty
+  floor fails before any debit. Openings snapshot slug, title, floor and each
+  card's drawn tier/OVR. Prices and Silver/Gold availability change only via
+  the audited, revisioned `kut.admin_apply_pack_settings`; direct writes to
+  `pack_definitions` are revoked and Regular cannot be switched off. Views only
+  gain columns; `open_pack` keeps its signature and response keys.
+  **Tier: data-changing** (existing openings backfilled with their recorded
+  slug and title, `tfh-pack` renamed "Regular pack", two definitions inserted
+  **off**, settings revision 1 seeded; no wallet, card or ledger row changes).
+  **Evidence:** 87 focused pgTAP assertions (research-harness parity to 1e-9)
+  and 6 concurrency tests pass; full local pgTAP (42 files) and integration
+  (27 tests) pass; KUT PR CI database, E2E and fast jobs pass. Copies are
+  byte-identical; SHA-256
+  `48c3a0d83cdf5a8ee091387140f3d8b992584e56be1537ae02cee97449634e52`.
+  **Smoke (owner, read-only):** three definitions (Regular 250 on, Silver 500
+  off, Gold 750 off) and no opening without a recorded title.
+  **Rollback:** before any Silver or Gold opening exists, a reviewed forward fix
+  re-emitting the previous `open_pack` and views (sources named in the
+  migration header). Afterwards keep the receipt columns; never drop them.
