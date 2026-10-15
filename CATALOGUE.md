@@ -1699,7 +1699,7 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   and nominations. Do not remove Safe Hands or restore the old unique-recipient
   constraint once duplicate regular/keeper nominations exist.
 
-- `20261023000000_pack_tiers.sql` (**pending**, not applied; KUT PR #321,
+- `20261023000000_pack_tiers.sql` (**applied** 2026-10-15; KUT PR #321,
   issue #223 S1, ADR-164). Regular, Silver and Gold packs on one canonical Live
   draw pool (`kut.pack_draw_pool()`), shared by `open_pack` and admin metrics.
   Silver (500, at least 1 Silver+) and Gold (750, at least 1 Gold+) restrict
@@ -1717,8 +1717,17 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   (27 tests) pass; KUT PR CI database, E2E and fast jobs pass. Copies are
   byte-identical; SHA-256
   `48c3a0d83cdf5a8ee091387140f3d8b992584e56be1537ae02cee97449634e52`.
-  **Smoke (owner, read-only):** three definitions (Regular 250 on, Silver 500
-  off, Gold 750 off) and no opening without a recorded title.
+  **Application:** owner-approved `apply-migrations` run
+  [38754107348](https://github.com/VibeTrunk/supabase/actions/runs/38754107348),
+  catalogue main `b2aa23a30aadf1a8ee81fe5a2d28bc85a958b58c`, tested KUT head
+  `f73c55dcdcd90def78fd0743fbb43471e1f3caf0`. Only this file was pending; it
+  was pushed at `14:49:32Z` and the post-push plan found nothing pending.
+  **Backup:** [38753546716](https://github.com/VibeTrunk/kut/actions/runs/38753546716),
+  finished `14:44:05Z`, five minutes old at the apply.
+  **Smoke:** the owner ran a read-only, rolled-back query as `service_role`:
+  definitions `tfh-pack 250 on, tfh-silver-pack 500 off, tfh-gold-pack 750
+  off`, no opening without a recorded slug/title, settings revision 1, one
+  offer on sale. KUT #321 merged as `8eac292e54677758140e510e4d96a0770e5bd225`.
   **Rollback:** before any Silver or Gold opening exists, a reviewed forward fix
   re-emitting the previous `open_pack` and views (sources named in the
   migration header). Afterwards keep the receipt columns; never drop them.
