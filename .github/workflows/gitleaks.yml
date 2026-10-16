@@ -1,0 +1,38 @@
+name: gitleaks
+
+# Runs the open-source gitleaks CLI directly via its official container image,
+# not the gitleaks-action wrapper — that wrapper now requires a paid
+# GITLEAKS_LICENSE for org-owned repos (even public ones). The CLI itself
+# stays free regardless of org/private status. `scan` is a required check on
+# main.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    container:
+      # v8.30.1, linux/amd64. The digest prevents a mutable tag from changing
+      # the scanner between reviewed workflow revisions.
+      image: ghcr.io/gitleaks/gitleaks@sha256:b109bc5f8f76a38196a3e413704fc5b9e3c32360bce4e4b603bd6f45b3721dbb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - run: |
+          # actions/checkout runs on the host; gitleaks runs as a different
+          # UID inside its own container, so git refuses to touch a repo it
+          # doesn't own ("dubious ownership") unless told otherwise here.
+          # Without this, gitleaks logs the git error but still exits 0 and
+          # reports "no leaks found" after scanning 0 commits — a silent
+          # false pass, not a hard failure. Confirmed by planting a fake
+          # secret and watching this exact failure mode before adding the
+          # config line.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          gitleaks git -v --redact=50
