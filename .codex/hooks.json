@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|PowerShell|exec_command|functions\\.exec_command)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/block-dangerous-commands.cjs\"",
+            "commandWindows": "node .codex/hooks/block-dangerous-commands.cjs",
+            "timeout": 10,
+            "statusMessage": "Safety check"
+          }
+        ]
+      }
+    ]
+  }
+}

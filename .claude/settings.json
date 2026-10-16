@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git status *)",
+      "Bash(git diff)",
+      "Bash(git diff *)",
+      "Bash(git log)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git branch)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(npm install)",
+      "Bash(npm run *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr diff*)",
+      "Bash(gh pr checks*)",
+      "Bash(gh pr status*)",
+      "Bash(gh run list*)",
+      "Bash(gh run view *)",
+      "Bash(gh issue view *)",
+      "Bash(gh issue list*)",
+      "Bash(ls)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(npx supabase migration list*)",
+      "Bash(npx supabase db push --dry-run*)",
+      "PowerShell(git status)",
+      "PowerShell(git status *)",
+      "PowerShell(git diff)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log)",
+      "PowerShell(git log *)",
+      "PowerShell(git show *)",
+      "PowerShell(git branch)",
+      "PowerShell(git branch *)",
+      "PowerShell(git add *)",
+      "PowerShell(npm install)",
+      "PowerShell(npm run *)",
+      "PowerShell(gh pr view *)",
+      "PowerShell(gh pr list*)",
+      "PowerShell(gh pr diff*)",
+      "PowerShell(gh pr checks*)",
+      "PowerShell(gh pr status*)",
+      "PowerShell(gh run list*)",
+      "PowerShell(gh run view *)",
+      "PowerShell(gh issue view *)",
+      "PowerShell(gh issue list*)",
+      "PowerShell(ls)",
+      "PowerShell(ls *)",
+      "PowerShell(cat *)",
+      "PowerShell(npx supabase migration list*)",
+      "PowerShell(npx supabase db push --dry-run*)",
+
+      "Bash(supabase migration list*)",
+      "Bash(supabase db push --dry-run*)",
+      "PowerShell(supabase migration list*)",
+      "PowerShell(supabase db push --dry-run*)",
+      "PowerShell(powershell -ExecutionPolicy Bypass -File scripts/verify-catalog.ps1)",
+
+      "Read",
+      "Glob",
+      "Grep"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git push *--delete*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -D *)",
+      "Bash(rm -rf *)",
+      "Bash(rm -r -f *)",
+      "Bash(sudo *)",
+      "Bash(npx supabase db push)",
+      "Bash(npx supabase db reset*)",
+      "Bash(npx supabase secrets set*)",
+      "Bash(npx supabase migration repair*)",
+      "PowerShell(git push --force*)",
+      "PowerShell(git push -f *)",
+      "PowerShell(git push *--delete*)",
+      "PowerShell(git reset --hard*)",
+      "PowerShell(git clean -f*)",
+      "PowerShell(git branch -D *)",
+      "PowerShell(Remove-Item * -Recurse -Force*)",
+      "PowerShell(Remove-Item * -Force -Recurse*)",
+      "PowerShell(sudo *)",
+      "PowerShell(npx supabase db push)",
+      "PowerShell(npx supabase db reset*)",
+      "PowerShell(npx supabase secrets set*)",
+      "PowerShell(npx supabase migration repair*)",
+      "Bash(supabase db push)",
+      "Bash(supabase db reset*)",
+      "Bash(supabase secrets set*)",
+      "Bash(supabase migration repair*)",
+      "PowerShell(supabase db push)",
+      "PowerShell(supabase db reset*)",
+      "PowerShell(supabase secrets set*)",
+      "PowerShell(supabase migration repair*)"
+    ]
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": [".claude/hooks/block-dangerous-commands.cjs"],
+            "timeout": 10,
+            "statusMessage": "Safety check"
+          }
+        ]
+      }
+    ]
+  }
+}

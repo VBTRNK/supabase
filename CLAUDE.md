@@ -26,6 +26,20 @@ application code, and local database tests.
 6. Locally, credentials belong only in an ignored `.env.local`. Never print
    them or put them in a command transcript.
 
+## Agent safety
+
+- Hooks in `.claude/hooks/` and `.codex/hooks/` block destructive shell
+  commands (forced deletes, force push, remote branch deletion, hard reset,
+  forced clean, broad checkout discards, forced branch deletion, downloads
+  piped into an interpreter). Changing a guard needs a PR the owner asked
+  for. Codex hooks and rules need the repo to be trusted.
+- The allow lists cover read-only commands only: `migration list` and
+  `db push --dry-run`. A real `db push`, `db reset`, `migration repair` and
+  `secrets set` are denied in Claude. In Codex the last three are forbidden
+  and a real `db push` prompts, because a rule on that prefix would also
+  catch `--dry-run`. `git commit`, `git push` and
+  `gh workflow run apply-migrations.yml` always prompt.
+
 ## Catalogue log
 
 Every catalogued migration, with its tier, backup, pre- and post-push
