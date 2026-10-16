@@ -39,6 +39,8 @@ application code, and local database tests.
   and a real `db push` prompts, because a rule on that prefix would also
   catch `--dry-run`. `git commit`, `git push` and
   `gh workflow run apply-migrations.yml` always prompt.
+- gitleaks scans every PR and every push to `main` (`.github/workflows/gitleaks.yml`,
+  check `scan`), as a second layer: hooks see commands, not file contents.
 
 ## Catalogue log
 
