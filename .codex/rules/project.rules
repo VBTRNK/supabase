@@ -1,0 +1,293 @@
+# Mirror the routine command permissions in .claude/settings.json.
+# An allow only removes the approval prompt; it never authorizes publishing.
+
+prefix_rule(
+    pattern = ["git", "status"],
+    decision = "allow",
+    justification = "Inspecting working tree state is routine and read-only.",
+    match = [
+        "git status",
+        "git status --short",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "diff"],
+    decision = "allow",
+    justification = "Reviewing diffs is routine and read-only.",
+    match = [
+        "git diff",
+        "git diff --stat",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "log"],
+    decision = "allow",
+    justification = "Reviewing commit history is routine and read-only.",
+    match = [
+        "git log",
+        "git log --oneline -10",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "show"],
+    decision = "allow",
+    justification = "Inspecting a specific commit is routine and read-only.",
+    match = [
+        "git show HEAD",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "branch"],
+    decision = "allow",
+    justification = "Listing or inspecting branches is routine; the hook blocks forced deletion.",
+    match = [
+        "git branch",
+        "git branch --show-current",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "add"],
+    decision = "allow",
+    justification = "Staging files is routine and reversible (git restore --staged undoes it).",
+    match = [
+        "git add .",
+    ],
+)
+
+# `git commit` and `git push` always prompt. A standing permission is not
+# per-change authorization: each commit and push needs the owner to say so for
+# that change.
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "prompt",
+    justification = "A commit records an authorization decision the owner makes per change.",
+    match = [
+        "git commit -m \"Fix typo\"",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Publishing a branch is outward-facing; the owner authorizes each push. Branch protection also rejects direct pushes to main.",
+    match = [
+        "git push",
+        "git push origin main",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npm", "install"],
+    decision = "allow",
+    justification = "Installing declared dependencies is routine and reversible (node_modules is disposable and gitignored).",
+    match = [
+        "npm install",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npm", "run"],
+    decision = "allow",
+    justification = "Project scripts (build, dev, test, lint) only read source and write to gitignored build output.",
+    match = [
+        "npm run build",
+        "npm run dev",
+    ],
+)
+
+prefix_rule(
+    pattern = ["ls"],
+    decision = "allow",
+    justification = "Listing directory contents is routine and read-only.",
+    match = [
+        "ls",
+        "ls src",
+    ],
+)
+
+prefix_rule(
+    pattern = ["cat"],
+    decision = "allow",
+    justification = "Reading a file's contents is routine and read-only.",
+    match = [
+        "cat package.json",
+    ],
+)
+
+# Only read-only `gh` subcommands are allowed. A whole `gh pr`, `gh run` or
+# `gh issue` prefix would also allow merge, close, comment, rerun, cancel and
+# delete. These mirror the gh allows in .claude/settings.json.
+prefix_rule(
+    pattern = ["gh", "pr", ["view", "list", "diff", "checks", "status"]],
+    decision = "allow",
+    justification = "Inspecting pull requests is routine and read-only.",
+    match = [
+        "gh pr list",
+        "gh pr view 1",
+        "gh pr diff 1",
+        "gh pr checks 1",
+        "gh pr status",
+    ],
+    not_match = [
+        "gh pr merge 1",
+        "gh pr close 1",
+        "gh pr comment 1",
+        "gh pr create",
+    ],
+)
+
+prefix_rule(
+    pattern = ["gh", "run", ["list", "view"]],
+    decision = "allow",
+    justification = "Inspecting GitHub Actions runs is routine and read-only.",
+    match = [
+        "gh run list",
+        "gh run view 123456789",
+    ],
+    not_match = [
+        "gh run rerun 123456789",
+        "gh run delete 123456789",
+        "gh run cancel 123456789",
+    ],
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", ["view", "list"]],
+    decision = "allow",
+    justification = "Reading issues is routine and read-only.",
+    match = [
+        "gh issue list",
+        "gh issue view 1",
+    ],
+    not_match = [
+        "gh issue create",
+        "gh issue close 1",
+        "gh issue comment 1",
+    ],
+)
+
+# --- Backend addon (shared VibeTrunk Supabase project) -------------------
+# Read-only and dry-run Supabase CLI commands are allowed. Anything that ships
+# code to, or changes the schema or secrets of, the ONE project every
+# VibeTrunk tool shares needs the owner's yes each time.
+#
+# A real `db push` is deliberately not listed: the strictest matching rule
+# wins, so a rule on the `db push` prefix would also catch `--dry-run`. Left
+# unlisted, it falls through to Codex's approval prompt; Claude denies it.
+
+prefix_rule(
+    pattern = ["npx", "supabase", "migration", "list"],
+    decision = "allow",
+    justification = "Listing applied migrations is routine and read-only.",
+    match = [
+        "npx supabase migration list",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "db", "push", "--dry-run"],
+    decision = "allow",
+    justification = "A dry run only prints the plan; it never touches the database.",
+    match = [
+        "npx supabase db push --dry-run",
+    ],
+    not_match = [
+        "npx supabase db push",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "functions", "deploy"],
+    decision = "prompt",
+    justification = "This ships code to the shared hosted project. Being reversible does not make it unattended: it is an external deployment and needs the owner to say so.",
+    match = [
+        "npx supabase functions deploy my-function",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "db", "reset"],
+    decision = "forbidden",
+    justification = "Resets a database; against the linked project it would wipe every VibeTrunk tool's data.",
+    match = [
+        "npx supabase db reset",
+        "npx supabase db reset --linked",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "secrets", "set"],
+    decision = "forbidden",
+    justification = "Rotates live secrets of the shared project; the owner does this.",
+    match = [
+        "npx supabase secrets set KEY=value",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", "supabase", "migration", "repair"],
+    decision = "forbidden",
+    justification = "Rewrites the shared project's migration history; the owner does this.",
+    match = [
+        "npx supabase migration repair --status applied 20260101000000",
+    ],
+)
+
+# --- This repo: the same rules for a globally installed CLI ----------------
+# This repo is the only deployment authority for the shared project. A real
+# `db push` and `gh workflow run apply-migrations.yml` are deliberately not
+# listed: both fall through to the approval prompt, and Claude denies the
+# push.
+
+prefix_rule(
+    pattern = ["supabase", "migration", "list"],
+    decision = "allow",
+    justification = "Listing applied migrations is routine and read-only.",
+    match = [
+        "supabase migration list --linked",
+    ],
+)
+
+prefix_rule(
+    pattern = ["supabase", "db", "push", "--dry-run"],
+    decision = "allow",
+    justification = "A dry run only prints the plan; it never touches the database.",
+    match = [
+        "supabase db push --dry-run",
+    ],
+    not_match = [
+        "supabase db push",
+    ],
+)
+
+prefix_rule(
+    pattern = ["supabase", "db", "reset"],
+    decision = "forbidden",
+    justification = "Resets a database; against the linked project it would wipe every VibeTrunk tool's data.",
+    match = [
+        "supabase db reset --linked",
+    ],
+)
+
+prefix_rule(
+    pattern = ["supabase", "secrets", "set"],
+    decision = "forbidden",
+    justification = "Rotates live secrets of the shared project; the owner does this.",
+    match = [
+        "supabase secrets set KEY=value",
+    ],
+)
+
+prefix_rule(
+    pattern = ["supabase", "migration", "repair"],
+    decision = "forbidden",
+    justification = "Rewrites the shared project's migration history; the owner does this.",
+    match = [
+        "supabase migration repair --status applied 20260101000000",
+    ],
+)
