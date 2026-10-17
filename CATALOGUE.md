@@ -1731,3 +1731,27 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   **Rollback:** before any Silver or Gold opening exists, a reviewed forward fix
   re-emitting the previous `open_pack` and views (sources named in the
   migration header). Afterwards keep the receipt columns; never drop them.
+
+- `20261024000000_academy_lifecycle.sql` (**pending**, not applied; KUT PR #344,
+  issue #246 S2, ADR-165). The Academy lifecycle (Talent, First Team, Retired):
+  `kut.players.lifecycle_stage` (every existing Player becomes founding First
+  Team, a stored stage, no event), lifecycle events, audited academy credits,
+  the single-row go-live anchor and an idempotent evaluator run from
+  `rebuild_season`, the injury RPCs and the new admin RPCs. One supply
+  predicate (`kut.can_mint_copies`) in the pack pool, starter grants, resets
+  and rotation; Retired cards can't be saved or locked into Midweek. Views only
+  gain columns; two new member projections. Part L 29-31. **Inactive until
+  go-live** is recorded (KUT #246 S4): no promotion, retirement, warning or
+  message before it.
+  **Tier: data-changing** (stage column backfilled `first_team`, one lifecycle
+  snapshot row per Player, notification type constraint widened; no wallet,
+  card, listing or ledger row changes).
+  **Evidence:** 95 focused pgTAP assertions pass; full local pgTAP (43 files)
+  passes with the migration; KUT `verify:fast` passes (656 tests). Copies are
+  byte-identical; SHA-256
+  `df199ed7ee68c399156b2814ccf7831206994f9fb488b4e65427fb41cbbc994e`.
+  **Smoke (owner, read-only):** players = First Team = lifecycle snapshots; no
+  lifecycle event, go-live row or credit; the pack pool size unchanged.
+  **Rollback:** before go-live, a reviewed forward fix re-emitting the replaced
+  functions and views (sources in the migration header), then dropping the new
+  objects and the column. After go-live keep the event history.
