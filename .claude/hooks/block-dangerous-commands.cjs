@@ -10,6 +10,16 @@
 const fs = require("node:fs");
 
 const dangers = [
+  // Hosted mutations are owner/workflow steps. Only a literal --dry-run
+  // flag on this push command is exempt; another command's flag is not.
+  [
+    /\bsupabase(?:\.(?:exe|cmd))?\s+db\s+push\b(?![^;\r\n&|#"'`]*\s--dry-run(?=\s|$|[;&|#"'`]))/i,
+    "real Supabase db push; use the approved workflow or the owner's terminal",
+  ],
+  [
+    /\bsupabase(?:\.(?:exe|cmd))?\s+(?:db\s+reset|secrets\s+set)\b/i,
+    "Supabase db reset or secrets set; the owner runs hosted changes",
+  ],
   // Anchored to a command position (start, after a separator, a quote or
   // sudo/xargs/...), so `docker run --rm` and `git rm -r --cached` still run.
   [
