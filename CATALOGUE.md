@@ -1732,7 +1732,7 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   re-emitting the previous `open_pack` and views (sources named in the
   migration header). Afterwards keep the receipt columns; never drop them.
 
-- `20261024000000_academy_lifecycle.sql` (**pending**, not applied; KUT PR #344,
+- `20261024000000_academy_lifecycle.sql` (**applied** 2026-10-18; KUT PR #344,
   issue #246 S2, ADR-165). The Academy lifecycle (Talent, First Team, Retired):
   `kut.players.lifecycle_stage` (every existing Player becomes founding First
   Team, a stored stage, no event), lifecycle events, audited academy credits,
@@ -1750,8 +1750,17 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   passes with the migration; KUT `verify:fast` passes (656 tests). Copies are
   byte-identical; SHA-256
   `df199ed7ee68c399156b2814ccf7831206994f9fb488b4e65427fb41cbbc994e`.
-  **Smoke (owner, read-only):** players = First Team = lifecycle snapshots; no
-  lifecycle event, go-live row or credit; the pack pool size unchanged.
+  **Application:** owner-approved `apply-migrations` run
+  [39081098075](https://github.com/VibeTrunk/supabase/actions/runs/39081098075),
+  catalogue main `ccb52d84ccc00bf77e9155011901351bdd9115da`, tested KUT head
+  `c02b0b67ace974ab3af869a91badadf5fbadc7f6`. Only this file was pending; it
+  was pushed at `00:01:45Z` and the post-push plan found nothing pending.
+  **Backup:** [39080905171](https://github.com/VibeTrunk/kut/actions/runs/39080905171),
+  finished `23:59:24Z` on 2026-10-17, two minutes old at the apply.
+  **Smoke:** the owner ran a read-only, rolled-back query as `service_role`:
+  37 Players, 37 First Team, 37 lifecycle snapshots, no lifecycle event, go-live
+  row or credit, and a pack pool of 37. KUT #344 merged as
+  `91e62f16eea25d1136a11edd9064225d1cc68568`.
   **Rollback:** before go-live, a reviewed forward fix re-emitting the replaced
   functions and views (sources in the migration header), then dropping the new
   objects and the column. After go-live keep the event history.
