@@ -1764,3 +1764,27 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   **Rollback:** before go-live, a reviewed forward fix re-emitting the replaced
   functions and views (sources in the migration header), then dropping the new
   objects and the column. After go-live keep the event history.
+
+- `20261025000000_midweek_named_trialists.sql` (**pending**, not applied; KUT PR
+  #348, issue #246 S5, ADR-165). Midweek trialists take the names of visible
+  Academy Talents: a nullable `kut.midweek_entry_cards.trialist_name` (check:
+  trialist rows only), `kut._mm_trialist_names` (a per-entrant seeded shuffle),
+  `kut._mm_lock_tournament` re-emitted to write the names with the entry cards
+  at the lock, and `kut.midweek_entries_public` gaining a trailing
+  `trialist_name`. The engine (`_mm_simulate`) and its golden vectors are
+  unchanged. Names are frozen at the lock (Part L 25); earlier weeks stay null
+  and pages fall back to "<manager>'s trialist".
+  **Tier: additive** (a nullable column, a check, a new function, `create or
+  replace` of one function and one view; no existing row changes). No deploy
+  ordering: KUT reads the view with `select("*")` and treats a missing column
+  as null.
+  **Evidence:** `midweek_named_trialists.test.sql` (20 assertions, including the
+  unchanged-engine check) and `midweek_draw_from_lock.test.sql` pass locally;
+  KUT `verify:fast` passes (668 tests). Copies are byte-identical; SHA-256
+  `8cfdcfef66f1643a92be870e7c632c3087e5708af036f24eb2b8fa7a9d11382b`.
+  **Smoke (owner, read-only):** the column, view column and function exist; no
+  stored week has a `trialist_name` until the next lock (2026-10-28).
+  **Rollback:** re-create `kut._mm_lock_tournament` from `20261016000000` and
+  the view from `20261020000000` (drop it first, re-apply grants), drop
+  `kut._mm_trialist_names`, then the column. Stored names are lost; pages fall
+  back.
