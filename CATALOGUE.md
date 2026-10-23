@@ -1797,3 +1797,24 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   the view from `20261020000000` (drop it first, re-apply grants), drop
   `kut._mm_trialist_names`, then the column. Stored names are lost; pages fall
   back.
+
+- `20261026000000_midweek_saved_byes.sql` (**pending**, not applied; KUT PR
+  #353, issue #314, ADR-166). Midweek round-1 byes go to saved squads first:
+  `kut._mm_simulate` re-emitted from `20261016000000`, changed only in its draw
+  block. The `bracket:bye` and `bracket:seat` shuffles are unchanged; the bye
+  queue is saved squads then auto squads, each in seat order. A squad with one
+  surviving saved card counts as saved.
+  **Tier: data-changing** (it changes who gets a bye at the lock and so who is
+  paid; no schema change, no existing row changes). Stored weeks keep their
+  brackets and are never re-simulated; a week first simulated after the push
+  uses the rule, including an open week whose lock is overdue, so check
+  read-only that no `open` week is past its lock before the apply. Never push
+  during a Wednesday evening. No deploy ordering: KUT never runs the draw.
+  **Evidence:** the regenerated `midweek_engine_parity.test.sql` passes locally
+  (210 assertions, including a hand-checked field); against the old function it
+  fails 37. KUT `verify:fast` passes (672 tests). Copies are byte-identical;
+  SHA-256 `b3efa6a4e6f944f9c4a742184e7756e920ef281bcd365d12300592e4927b3fb6`.
+  **Smoke (owner, read-only):** `kut._mm_simulate`'s source contains
+  `v_bye_holders`; no stored week changes until the next lock.
+  **Rollback:** re-create `kut._mm_simulate` from `20261016000000`. Weeks
+  simulated in between keep their stored brackets.
