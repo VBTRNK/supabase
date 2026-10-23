@@ -1798,7 +1798,7 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   `kut._mm_trialist_names`, then the column. Stored names are lost; pages fall
   back.
 
-- `20261026000000_midweek_saved_byes.sql` (**pending**, not applied; KUT PR
+- `20261026000000_midweek_saved_byes.sql` (**applied** 2026-10-23; KUT PR
   #353, issue #314, ADR-166). Midweek round-1 byes go to saved squads first:
   `kut._mm_simulate` re-emitted from `20261016000000`, changed only in its draw
   block. The `bracket:bye` and `bracket:seat` shuffles are unchanged; the bye
@@ -1814,7 +1814,17 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   (210 assertions, including a hand-checked field); against the old function it
   fails 37. KUT `verify:fast` passes (672 tests). Copies are byte-identical;
   SHA-256 `b3efa6a4e6f944f9c4a742184e7756e920ef281bcd365d12300592e4927b3fb6`.
+  **Application:** owner-approved `apply-migrations` run
+  [40036478083](https://github.com/VibeTrunk/supabase/actions/runs/40036478083),
+  catalogue main `88b5eb4c016cf745e3a7f3228c05069bd229619c`, tested KUT head
+  `c10955d`. Only this file was pending; it was pushed at `22:57:24Z` and the
+  post-push plan found nothing pending. The overdue-week check passed first
+  (the owner ran it: 0 overdue `open` weeks, next lock 2026-10-28 18:55 UTC).
+  **Backup:** [40036190851](https://github.com/VibeTrunk/kut/actions/runs/40036190851),
+  finished `22:53:38Z` on 2026-10-23, four minutes old at the push.
   **Smoke (owner, read-only):** `kut._mm_simulate`'s source contains
-  `v_bye_holders`; no stored week changes until the next lock.
+  `v_bye_holders`; no stored week changes until the next lock. The result was
+  not reported back when this was recorded.
+  KUT #353 merged as `c2695ba811aada7c305e530917e08d7c4e7b6848`.
   **Rollback:** re-create `kut._mm_simulate` from `20261016000000`. Weeks
   simulated in between keep their stored brackets.
