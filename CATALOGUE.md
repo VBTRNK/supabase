@@ -1765,7 +1765,7 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   functions and views (sources in the migration header), then dropping the new
   objects and the column. After go-live keep the event history.
 
-- `20261025000000_midweek_named_trialists.sql` (**pending**, not applied; KUT PR
+- `20261025000000_midweek_named_trialists.sql` (**applied** 2026-10-23; KUT PR
   #348, issue #246 S5, ADR-165). Midweek trialists take the names of visible
   Academy Talents: a nullable `kut.midweek_entry_cards.trialist_name` (check:
   trialist rows only), `kut._mm_trialist_names` (a per-entrant seeded shuffle),
@@ -1782,8 +1782,17 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   unchanged-engine check) and `midweek_draw_from_lock.test.sql` pass locally;
   KUT `verify:fast` passes (668 tests). Copies are byte-identical; SHA-256
   `8cfdcfef66f1643a92be870e7c632c3087e5708af036f24eb2b8fa7a9d11382b`.
-  **Smoke (owner, read-only):** the column, view column and function exist; no
-  stored week has a `trialist_name` until the next lock (2026-10-28).
+  **Application:** owner-approved `apply-migrations` run
+  [40030379370](https://github.com/VibeTrunk/supabase/actions/runs/40030379370),
+  catalogue main `b53f1f9e5d1e063253877472997011c04219216b`, tested KUT head
+  `c817268aa316fded0750962e3d03792ca55b2976`. Only this file was pending; it
+  was pushed at `21:58:56Z` and the post-push plan found nothing pending.
+  **Backup:** [40029964623](https://github.com/VibeTrunk/kut/actions/runs/40029964623),
+  finished `21:56:39Z` on 2026-10-23, two minutes old at the apply.
+  **Smoke:** the owner ran a read-only, rolled-back query as `service_role`:
+  the column, view column and draw function exist; no stored week has a
+  `trialist_name` (the first named lock is 2026-10-28); two visible Talents.
+  KUT #348 merged as `558dfccfb160f9480e5c2957e0511180d476d180`.
   **Rollback:** re-create `kut._mm_lock_tournament` from `20261016000000` and
   the view from `20261020000000` (drop it first, re-apply grants), drop
   `kut._mm_trialist_names`, then the column. Stored names are lost; pages fall
