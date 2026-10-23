@@ -1823,8 +1823,8 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   **Backup:** [40036190851](https://github.com/VibeTrunk/kut/actions/runs/40036190851),
   finished `22:53:38Z` on 2026-10-23, four minutes old at the push.
   **Smoke (owner, read-only):** `kut._mm_simulate`'s source contains
-  `v_bye_holders`; no stored week changes until the next lock. The result was
-  not reported back when this was recorded.
+  `v_bye_holders`; no stored week changes until the next lock. The owner
+  confirmed it passed.
   KUT #353 merged as `c2695ba811aada7c305e530917e08d7c4e7b6848`.
   **Rollback:** re-create `kut._mm_simulate` from `20261016000000`. Weeks
   simulated in between keep their stored brackets.
