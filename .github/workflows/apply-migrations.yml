@@ -1,7 +1,7 @@
 name: apply-migrations
 
-# Applies catalogued migrations to the shared hosted project (VibeTrunk/kut
-# ADR-144). Dispatch it with a catalogue commit on main and the VibeTrunk/kut
+# Applies catalogued migrations to the shared hosted project (VBTRNK/kut
+# ADR-144). Dispatch it with a catalogue commit on main and the VBTRNK/kut
 # commit that holds the same migration files.
 #
 # - plan: runs `migration list` and `db push --dry-run` at that commit, and
@@ -22,7 +22,7 @@ on:
         description: Catalogue commit on main to apply (full 40-character SHA)
         required: true
       kut_ref:
-        description: VibeTrunk/kut commit with the same migrations (the kut PR's head SHA, or main)
+        description: VBTRNK/kut commit with the same migrations (the kut PR's head SHA, or main)
         required: true
         default: main
 
@@ -62,7 +62,7 @@ jobs:
             || { echo "$CATALOGUE_SHA is not on main. Merge the catalogue PR first." >&2; exit 1; }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          repository: VibeTrunk/kut
+          repository: VBTRNK/kut
           ref: ${{ inputs.kut_ref }}
           path: .kut
           sparse-checkout: supabase/migrations
@@ -115,7 +115,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          repository: VibeTrunk/kut
+          repository: VBTRNK/kut
           ref: ${{ inputs.kut_ref }}
           path: .kut
           sparse-checkout: supabase/migrations

@@ -9,21 +9,21 @@ Central migration catalogue for the single shared VibeTrunk Supabase project.
    `scripts/verify-catalog.ps1` and run
    `powershell -ExecutionPolicy Bypass -File scripts/verify-catalog.ps1`.
 3. Review and merge the catalogue PR. For KUT, the order is in
-   `docs/RELEASING.md` of `VibeTrunk/kut`: its migration PR's database tests
+   `docs/RELEASING.md` of `VBTRNK/kut`: its migration PR's database tests
    pass first, and its `catalogue-parity` check turns green only after this
    merge.
 4. Apply with the **`apply-migrations`** workflow (KUT ADR-144):
 
    ```powershell
-   gh workflow run backup.yml -R VibeTrunk/kut   # a backup under an hour old
-   gh workflow run apply-migrations.yml -R VibeTrunk/supabase `
+   gh workflow run backup.yml -R VBTRNK/kut   # a backup under an hour old
+   gh workflow run apply-migrations.yml -R VBTRNK/supabase `
      -f catalogue_sha=<catalogue main SHA> -f kut_ref=<kut PR head SHA>
    ```
 
    Approve the `production` environment once to see the plan (the job summary
    lists every pending file and its SHA-256), then again to apply it. The plan
    refuses any pending migration without a byte-identical copy in
-   `VibeTrunk/kut`; the apply job pushes only an identical list and checks
+   `VBTRNK/kut`; the apply job pushes only an identical list and checks
    nothing is left pending. With nothing pending, the plan reports "up to date"
    and the apply job is skipped.
 

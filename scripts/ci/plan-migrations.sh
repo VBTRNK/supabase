@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Writes the migrations `supabase db push` would apply to <plan-file>, one
 # "<file> <sha256>" line each, and refuses any that is not a KUT migration.
-# A KUT migration has a byte-identical copy in the given VibeTrunk/kut
+# A KUT migration has a byte-identical copy in the given VBTRNK/kut
 # migrations directory; other tools' migrations need their own route
-# (VibeTrunk/kut ADR-144). An empty plan file means the database is up to date.
+# (VBTRNK/kut ADR-144). An empty plan file means the database is up to date.
 #
 # Usage: scripts/ci/plan-migrations.sh <kut-migrations-dir> <plan-file>
 # Env:   DB_URL      connection URL without a password
@@ -48,7 +48,7 @@ while IFS= read -r name; do
     echo "REFUSED: $name is not in this catalogue commit." >&2
     refused=1
   elif [[ ! -f "$kut_dir/$name" ]] || ! cmp -s "supabase/migrations/$name" "$kut_dir/$name"; then
-    echo "REFUSED: $name is not a KUT migration (no byte-identical copy in VibeTrunk/kut)." >&2
+    echo "REFUSED: $name is not a KUT migration (no byte-identical copy in VBTRNK/kut)." >&2
     refused=1
   else
     echo "$name $(sha256sum "supabase/migrations/$name" | cut -d' ' -f1)" >> "$plan_file"

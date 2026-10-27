@@ -1545,7 +1545,7 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   should end in the open week).
 
 - `20261018000000_special_snapshot_tiers.sql` (**applied 2026-10-04**, catalogue PR #79):
-  KUT KB-038 / ADR-121, [KUT PR #184](https://github.com/VibeTrunk/kut/pull/184).
+  KUT KB-038 / ADR-121, [KUT PR #184](https://github.com/VBTRNK/kut/pull/184).
   Follows `20261017000000_midweek_predictions.sql`. Projection-only correction:
   collection, market, saved pack results and offered-card JSON read Specials'
   immutable `snapshot_rarity_tier`; Live tiers and missing-state floors remain.
@@ -1652,13 +1652,13 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   goals), also present with old policies: current-week data violates those
   fixtures' assumptions. The same unchanged tests pass on the fresh stack.
   **Application:** owner-approved `apply-migrations` run
-  [38227966186](https://github.com/VibeTrunk/supabase/actions/runs/38227966186),
+  [38227966186](https://github.com/VBTRNK/supabase/actions/runs/38227966186),
   catalogue main `cc5cbb4da4a7f4e066dfb122ed844d3546bf38b1`, tested KUT head
   `aa516c87f14c75913774d051fff5d80974b3a6c8`. Only this file was pending;
   the apply job rechecked the approved list and pushed it at `09:28:15Z`.
   SHA-256 `0b631a9716828e9ac25699a1e34e7a6c5a98d0b4f6d0e23fcb1151cd6d5847fe`
   matches the tested SQL bytes. The post-push check found nothing pending.
-  **Backup:** [38227500063](https://github.com/VibeTrunk/kut/actions/runs/38227500063)
+  **Backup:** [38227500063](https://github.com/VBTRNK/kut/actions/runs/38227500063)
   passed its independent restore check and finished at `09:07:19Z`; the apply
   job verified its age was 20 minutes. Encrypted artifact:
   `kut-backup-20261012T090447Z`.
@@ -1686,13 +1686,13 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   failures with and without this migration: injury notice and Chronicle weekly
   goals; fresh KUT CI remains required. Copies are byte-identical.
   **Application:** owner-approved `apply-migrations` run
-  [38647294212](https://github.com/VibeTrunk/supabase/actions/runs/38647294212),
+  [38647294212](https://github.com/VBTRNK/supabase/actions/runs/38647294212),
   catalogue main `655a3112ff0a845a89a2dd7bbabd5cacd14b74f0`, tested KUT head
   `6fb3d3cc221f6f07aec0655d2b6c4692296bed2d`. Only this file was pending; it
   was pushed at `22:28:17Z` with SHA-256
   `cb920be99b4b25e6fcaad039783839e45d92cae661d41462e5d9801ba8d25101`, and the
   post-push plan found nothing pending.
-  **Backup:** [38646881824](https://github.com/VibeTrunk/kut/actions/runs/38646881824),
+  **Backup:** [38646881824](https://github.com/VBTRNK/kut/actions/runs/38646881824),
   five minutes old at the apply. **Smoke:** none recorded. This entry was
   completed late, from the workflow logs, in the `20261023000000` catalogue PR.
   **Rollback:** use a reviewed forward fix preserving recorded four-slot ballots
@@ -1718,11 +1718,11 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   byte-identical; SHA-256
   `48c3a0d83cdf5a8ee091387140f3d8b992584e56be1537ae02cee97449634e52`.
   **Application:** owner-approved `apply-migrations` run
-  [38754107348](https://github.com/VibeTrunk/supabase/actions/runs/38754107348),
+  [38754107348](https://github.com/VBTRNK/supabase/actions/runs/38754107348),
   catalogue main `b2aa23a30aadf1a8ee81fe5a2d28bc85a958b58c`, tested KUT head
   `f73c55dcdcd90def78fd0743fbb43471e1f3caf0`. Only this file was pending; it
   was pushed at `14:49:32Z` and the post-push plan found nothing pending.
-  **Backup:** [38753546716](https://github.com/VibeTrunk/kut/actions/runs/38753546716),
+  **Backup:** [38753546716](https://github.com/VBTRNK/kut/actions/runs/38753546716),
   finished `14:44:05Z`, five minutes old at the apply.
   **Smoke:** the owner ran a read-only, rolled-back query as `service_role`:
   definitions `tfh-pack 250 on, tfh-silver-pack 500 off, tfh-gold-pack 750
@@ -1751,11 +1751,11 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   byte-identical; SHA-256
   `df199ed7ee68c399156b2814ccf7831206994f9fb488b4e65427fb41cbbc994e`.
   **Application:** owner-approved `apply-migrations` run
-  [39081098075](https://github.com/VibeTrunk/supabase/actions/runs/39081098075),
+  [39081098075](https://github.com/VBTRNK/supabase/actions/runs/39081098075),
   catalogue main `ccb52d84ccc00bf77e9155011901351bdd9115da`, tested KUT head
   `c02b0b67ace974ab3af869a91badadf5fbadc7f6`. Only this file was pending; it
   was pushed at `00:01:45Z` and the post-push plan found nothing pending.
-  **Backup:** [39080905171](https://github.com/VibeTrunk/kut/actions/runs/39080905171),
+  **Backup:** [39080905171](https://github.com/VBTRNK/kut/actions/runs/39080905171),
   finished `23:59:24Z` on 2026-10-17, two minutes old at the apply.
   **Smoke:** the owner ran a read-only, rolled-back query as `service_role`:
   37 Players, 37 First Team, 37 lifecycle snapshots, no lifecycle event, go-live
@@ -1783,11 +1783,11 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   KUT `verify:fast` passes (668 tests). Copies are byte-identical; SHA-256
   `8cfdcfef66f1643a92be870e7c632c3087e5708af036f24eb2b8fa7a9d11382b`.
   **Application:** owner-approved `apply-migrations` run
-  [40030379370](https://github.com/VibeTrunk/supabase/actions/runs/40030379370),
+  [40030379370](https://github.com/VBTRNK/supabase/actions/runs/40030379370),
   catalogue main `b53f1f9e5d1e063253877472997011c04219216b`, tested KUT head
   `c817268aa316fded0750962e3d03792ca55b2976`. Only this file was pending; it
   was pushed at `21:58:56Z` and the post-push plan found nothing pending.
-  **Backup:** [40029964623](https://github.com/VibeTrunk/kut/actions/runs/40029964623),
+  **Backup:** [40029964623](https://github.com/VBTRNK/kut/actions/runs/40029964623),
   finished `21:56:39Z` on 2026-10-23, two minutes old at the apply.
   **Smoke:** the owner ran a read-only, rolled-back query as `service_role`:
   the column, view column and draw function exist; no stored week has a
@@ -1815,12 +1815,12 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   fails 37. KUT `verify:fast` passes (672 tests). Copies are byte-identical;
   SHA-256 `b3efa6a4e6f944f9c4a742184e7756e920ef281bcd365d12300592e4927b3fb6`.
   **Application:** owner-approved `apply-migrations` run
-  [40036478083](https://github.com/VibeTrunk/supabase/actions/runs/40036478083),
+  [40036478083](https://github.com/VBTRNK/supabase/actions/runs/40036478083),
   catalogue main `88b5eb4c016cf745e3a7f3228c05069bd229619c`, tested KUT head
   `c10955d`. Only this file was pending; it was pushed at `22:57:24Z` and the
   post-push plan found nothing pending. The overdue-week check passed first
   (the owner ran it: 0 overdue `open` weeks, next lock 2026-10-28 18:55 UTC).
-  **Backup:** [40036190851](https://github.com/VibeTrunk/kut/actions/runs/40036190851),
+  **Backup:** [40036190851](https://github.com/VBTRNK/kut/actions/runs/40036190851),
   finished `22:53:38Z` on 2026-10-23, four minutes old at the push.
   **Smoke (owner, read-only):** `kut._mm_simulate`'s source contains
   `v_bye_holders`; no stored week changes until the next lock. The owner
