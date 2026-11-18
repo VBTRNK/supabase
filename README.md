@@ -21,14 +21,15 @@ Central migration catalogue for the single shared VibeTrunk Supabase project.
      -f catalogue_sha=<catalogue main SHA> -f kut_ref=<kut PR head SHA>
    ```
 
-   For a cnc migration, also pass `-f cnc_ref=<cnc PR head SHA>` (or `main`
-   once that PR is merged); `kut_ref` stays `main` unless KUT has one too.
+   `cnc_ref` defaults to `main`; before a cnc migration PR merges, pass
+   `-f cnc_ref=<cnc PR head SHA>` instead, and `-f kut_ref=main` if KUT has
+   nothing pending.
 
    Approve the `production` environment once to see the plan (the job summary
    lists every pending file, its SHA-256 and its tool), then again to apply
    it. The plan refuses any pending migration without a byte-identical copy in
-   a tool named by the dispatch: `VBTRNK/kut` always, `VBTRNK/cnc` only with
-   `cnc_ref`. The apply job pushes only an identical list and checks
+   its tool's repo at the dispatched ref (`VBTRNK/kut`, `VBTRNK/cnc`). The
+   apply job pushes only an identical list and checks
    nothing is left pending. With nothing pending, the plan reports "up to date"
    and the apply job is skipped.
 
