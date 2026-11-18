@@ -1,11 +1,13 @@
 name: apply-migrations
 
 # Applies catalogued migrations to the shared hosted project (VBTRNK/kut
-# ADR-144). Dispatch it with a catalogue commit on main and the VBTRNK/kut
-# commit that holds the same migration files.
+# ADR-144, VBTRNK/cnc ADR-010). Dispatch it with a catalogue commit on main
+# and, per tool, the commit that holds the same migration files (`kut_ref`,
+# `cnc_ref`; each defaults to main, a tool's PR head SHA before it merges).
 #
 # - plan: runs `migration list` and `db push --dry-run` at that commit, and
-#   refuses any pending migration without a byte-identical copy in kut.
+#   refuses any pending migration without a byte-identical copy in its tool's
+#   repo at that tool's ref. An empty `cnc_ref` refuses cnc migrations.
 # - apply: plans the same commit again and needs the identical list, then a
 #   kut backup under an hour old, then runs `db push` and checks nothing is
 #   left pending. Skipped when nothing is pending.
@@ -25,6 +27,10 @@ on:
         description: VBTRNK/kut commit with the same migrations (the kut PR's head SHA, or main)
         required: true
         default: main
+      cnc_ref:
+        description: VBTRNK/cnc commit with the same migrations (the cnc PR's head SHA, or main); empty refuses cnc migrations
+        required: false
+        default: main
 
 permissions:
   contents: read
@@ -37,6 +43,9 @@ env:
   SUPABASE: npx --yes supabase@2.118.0
   CATALOGUE_SHA: ${{ inputs.catalogue_sha }}
   KUT_REF: ${{ inputs.kut_ref }}
+  CNC_REF: ${{ inputs.cnc_ref }}
+  # The tools whose migrations this dispatch may apply, as <tool>=<migrations-dir>.
+  OWNERS: kut=.kut/supabase/migrations${{ inputs.cnc_ref != '' && ' cnc=.cnc/supabase/migrations' || '' }}
 
 jobs:
   plan:
@@ -51,6 +60,7 @@ jobs:
         run: |
           [[ "$CATALOGUE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "catalogue_sha must be a full 40-character commit SHA." >&2; exit 1; }
           [[ "$KUT_REF" == main || "$KUT_REF" =~ ^[0-9a-f]{40}$ ]] || { echo "kut_ref must be main or a full commit SHA." >&2; exit 1; }
+          [[ -z "$CNC_REF" || "$CNC_REF" == main || "$CNC_REF" =~ ^[0-9a-f]{40}$ ]] || { echo "cnc_ref must be empty, main or a full commit SHA." >&2; exit 1; }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ inputs.catalogue_sha }}
@@ -67,6 +77,14 @@ jobs:
           path: .kut
           sparse-checkout: supabase/migrations
           persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: inputs.cnc_ref != ''
+        with:
+          repository: VBTRNK/cnc
+          ref: ${{ inputs.cnc_ref }}
+          path: .cnc
+          sparse-checkout: supabase/migrations
+          persist-credentials: false
       - id: plan
         name: Plan
         env:
@@ -76,7 +94,8 @@ jobs:
         run: |
           set -euo pipefail
           export DB_URL="postgresql://${PGUSER}@${PGHOST}:5432/postgres?sslmode=require"
-          bash scripts/ci/plan-migrations.sh .kut/supabase/migrations "$RUNNER_TEMP/plan.txt"
+          read -r -a owners <<< "$OWNERS"
+          bash scripts/ci/plan-migrations.sh "$RUNNER_TEMP/plan.txt" "${owners[@]}"
           {
             echo 'plan<<EOF_PLAN'
             cat "$RUNNER_TEMP/plan.txt"
@@ -84,7 +103,7 @@ jobs:
             echo "count=$(wc -l < "$RUNNER_TEMP/plan.txt")"
           } >> "$GITHUB_OUTPUT"
           {
-            echo "### Plan for \`$CATALOGUE_SHA\`"
+            echo "### Plan for \`$CATALOGUE_SHA\` (kut \`$KUT_REF\`, cnc \`${CNC_REF:-none}\`)"
             if [[ -s "$RUNNER_TEMP/plan.txt" ]]; then
               echo; echo '```'; cat "$RUNNER_TEMP/plan.txt"; echo '```'
             else
@@ -120,11 +139,20 @@ jobs:
           path: .kut
           sparse-checkout: supabase/migrations
           persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: inputs.cnc_ref != ''
+        with:
+          repository: VBTRNK/cnc
+          ref: ${{ inputs.cnc_ref }}
+          path: .cnc
+          sparse-checkout: supabase/migrations
+          persist-credentials: false
       - name: Plan again and require the approved list
         run: |
           set -euo pipefail
           export DB_URL="postgresql://${PGUSER}@${PGHOST}:5432/postgres?sslmode=require"
-          bash scripts/ci/plan-migrations.sh .kut/supabase/migrations "$RUNNER_TEMP/plan.txt"
+          read -r -a owners <<< "$OWNERS"
+          bash scripts/ci/plan-migrations.sh "$RUNNER_TEMP/plan.txt" "${owners[@]}"
           printf '%s\n' "$PLANNED" > "$RUNNER_TEMP/approved.txt"
           diff -u "$RUNNER_TEMP/approved.txt" "$RUNNER_TEMP/plan.txt" \
             || { echo "The pending list changed since the approved plan; nothing was pushed." >&2; exit 1; }
@@ -141,7 +169,8 @@ jobs:
         run: |
           set -euo pipefail
           export DB_URL="postgresql://${PGUSER}@${PGHOST}:5432/postgres?sslmode=require"
-          bash scripts/ci/plan-migrations.sh .kut/supabase/migrations "$RUNNER_TEMP/after.txt"
+          read -r -a owners <<< "$OWNERS"
+          bash scripts/ci/plan-migrations.sh "$RUNNER_TEMP/after.txt" "${owners[@]}"
           test ! -s "$RUNNER_TEMP/after.txt"
           {
             echo "### Applied at \`$CATALOGUE_SHA\`"
