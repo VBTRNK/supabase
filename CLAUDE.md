@@ -20,7 +20,7 @@ application code, and local database tests.
 4. Live migrations go through `.github/workflows/apply-migrations.yml`
    (README): a kut backup under an hour old, a plan in which every pending
    migration has a byte-identical copy in its tool's repo at the dispatched
-   ref (KUT, cnc), the owner's approval of the `production`
+   ref (KUT, cnc) and all from one tool, the owner's approval of the `production`
    environment, then the push. Its database password exists only as that
    environment's secret.
 5. Never use `migration repair` to hide an unexpected version. Investigate the

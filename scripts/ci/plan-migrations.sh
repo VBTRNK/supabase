@@ -3,8 +3,9 @@
 # "<file> <sha256> <tool>" line each, and refuses any that no named tool owns.
 # A tool owns a migration when its migrations directory (a checkout of that
 # tool's repo at the dispatched ref) holds a byte-identical copy (VBTRNK/kut
-# ADR-144, VBTRNK/cnc ADR-010). An empty plan file means the database is up to
-# date.
+# ADR-144, VBTRNK/cnc ADR-010). A plan holds one tool's migrations only, so a
+# failure in one tool's migration never stops another tool's apply partway.
+# An empty plan file means the database is up to date.
 #
 # Usage: scripts/ci/plan-migrations.sh <plan-file> <tool>=<migrations-dir>...
 #        e.g. plan-migrations.sh plan.txt kut=.kut/supabase/migrations cnc=.cnc/supabase/migrations
@@ -83,6 +84,11 @@ if [[ $refused -ne 0 ]]; then
 fi
 if [[ ! -s "$plan_file" ]]; then
   echo "The dry run listed no migrations; refusing to plan." >&2
+  exit 1
+fi
+planned_tools=$(cut -d' ' -f3 "$plan_file" | sort -u | paste -sd' ' -)
+if [[ "$planned_tools" == *" "* ]]; then
+  echo "Refusing the plan: it mixes tools ($planned_tools). Apply one tool per run: dispatch with the catalogue commit that added the earliest pending migrations, then again with a later one." >&2
   exit 1
 fi
 echo "Plan:"

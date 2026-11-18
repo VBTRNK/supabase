@@ -28,8 +28,12 @@ Central migration catalogue for the single shared VibeTrunk Supabase project.
    Approve the `production` environment once to see the plan (the job summary
    lists every pending file, its SHA-256 and its tool), then again to apply
    it. The plan refuses any pending migration without a byte-identical copy in
-   its tool's repo at the dispatched ref (`VBTRNK/kut`, `VBTRNK/cnc`). The
-   apply job pushes only an identical list and checks
+   its tool's repo at the dispatched ref (`VBTRNK/kut`, `VBTRNK/cnc`), and a
+   plan that mixes tools: each run applies one tool's migrations, so a failure
+   in one never stops another's apply partway. When two tools have migrations
+   pending, dispatch with the catalogue commit that added the earliest, then
+   again with `main` (`db push` refuses a migration older than the latest
+   applied one). The apply job pushes only an identical list and checks
    nothing is left pending. With nothing pending, the plan reports "up to date"
    and the apply job is skipped.
 
