@@ -1828,3 +1828,43 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   KUT #353 merged as `c2695ba811aada7c305e530917e08d7c4e7b6848`.
   **Rollback:** re-create `kut._mm_simulate` from `20261016000000`. Weeks
   simulated in between keep their stored brackets.
+- `20261118120000_cnc_saves.sql` (**catalogued, not yet applied**; Crime &
+  Crown, VBTRNK/cnc ADR-009, tracking issue VBTRNK/cnc#8). The first
+  migration for schema `cnc`. No accounts and no auth change: a save is kept
+  under a random cloud code, and the table `cnc.saves` stores only the code's
+  SHA-256. RLS with no policy, so no client role reads or writes the table.
+  Only `anon` (the browser, publishable key) may execute `cnc.get_save` and
+  `cnc.put_save` (security definer, empty search path); `authenticated` gets
+  nothing. `put_save` checks the base revision, answers a retried upload
+  (same id, base and save) as saved and refuses a reused upload id; revisions
+  come from one sequence (`cnc.revisions`), so none repeats even after a row
+  is deleted and created again. It caps a save at 64 KiB, and creates every
+  save on one path, under an advisory lock after the caps: at most 60 new
+  codes an hour and 2000 in all (at most 125 MiB of saves), holding while
+  rows are deleted. Both caps count the saves still stored. At a cap, new
+  codes are refused with hint `busy` and existing codes keep working; raising
+  a cap or deleting stale rows is a later migration, which deletes only saves
+  created more than an hour ago and never resets `cnc.revisions`. Request
+  volume is bounded by the gateway, not in SQL; the owner accepted that load
+  on this shared project (cnc ADR-009, 2026-11-18).
+  **Tier: additive** (a new schema; nothing existing changes, no data
+  migration). No deploy ordering: the game hides cloud saves until its build
+  has the Supabase settings, and a cloud write before the push only fails.
+  **Route:** not a KUT migration, so the `apply-migrations` workflow refuses
+  it while it is pending, and KUT's next apply waits for it. Merge this entry
+  right before the owner's terminal push from this repo, after a dry run shows
+  only this file pending. Then, as hosted configuration: add `cnc` to the
+  Data API's exposed schemas.
+  **Evidence:** the cnc repo runs this file in PGlite with Supabase's
+  `anon` and `authenticated` roles (`tests/saves-sql.test.ts`, 17 tests:
+  revision order, first-save protection, exact retries and reused ids or
+  bases, no revision reused after a deletion, one insert behind the lock and
+  caps, code, shape, version and size refusals by SQLSTATE, both new-code caps, saves
+  kept apart by code, the stored SHA-256, RLS on, no table privilege and no
+  helper execute for either role). Copies are byte-identical; SHA-256
+  `2f4f64944b3d0e942be6d5d9a49166a2b42e59d74f4e2212e2cba53c6ced3ad9`.
+  **Smoke (owner):** in the game, keep a run in the cloud, make a move, and
+  see one `cnc.saves` row with no readable code in it; enter the code on a
+  second device and get the run; a made-up code finds nothing.
+  **Rollback:** `drop schema cnc cascade;` (nothing else depends on it; the
+  sequence goes with the schema).
