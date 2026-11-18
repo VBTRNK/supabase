@@ -1850,11 +1850,12 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   **Tier: additive** (a new schema; nothing existing changes, no data
   migration). No deploy ordering: the game hides cloud saves until its build
   has the Supabase settings, and a cloud write before the push only fails.
-  **Route:** not a KUT migration, so the `apply-migrations` workflow refuses
-  it while it is pending, and KUT's next apply waits for it. Merge this entry
-  right before the owner's terminal push from this repo, after a dry run shows
-  only this file pending. Then, as hosted configuration: add `cnc` to the
-  Data API's exposed schemas.
+  **Route:** the `apply-migrations` workflow (cnc ADR-010; the `cnc_ref`
+  input from PR #105, merged first). After this entry merges: a fresh kut
+  backup, then dispatch with this commit on main, `kut_ref=main` and
+  `cnc_ref=main` (cnc #20 is merged); the plan must show this one file,
+  tool `cnc`. KUT's next apply refuses while it is pending. Then, as hosted
+  configuration: add `cnc` to the Data API's exposed schemas.
   **Evidence:** the cnc repo runs this file in PGlite with Supabase's
   `anon` and `authenticated` roles (`tests/saves-sql.test.ts`, 17 tests:
   revision order, first-save protection, exact retries and reused ids or
