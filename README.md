@@ -11,8 +11,9 @@ Central migration catalogue for the single shared VibeTrunk Supabase project.
 3. Review and merge the catalogue PR. For KUT, the order is in
    `docs/RELEASING.md` of `VBTRNK/kut`: its migration PR's database tests
    pass first, and its `catalogue-parity` check turns green only after this
-   merge.
-4. Apply with the **`apply-migrations`** workflow (KUT ADR-144):
+   merge. Crime & Crown follows the same order (`AGENTS.md` "Database" in
+   `VBTRNK/cnc`).
+4. Apply with the **`apply-migrations`** workflow (KUT ADR-144, cnc ADR-010):
 
    ```powershell
    gh workflow run backup.yml -R VBTRNK/kut   # a backup under an hour old
@@ -20,16 +21,20 @@ Central migration catalogue for the single shared VibeTrunk Supabase project.
      -f catalogue_sha=<catalogue main SHA> -f kut_ref=<kut PR head SHA>
    ```
 
+   For a cnc migration, also pass `-f cnc_ref=<cnc PR head SHA>` (or `main`
+   once that PR is merged); `kut_ref` stays `main` unless KUT has one too.
+
    Approve the `production` environment once to see the plan (the job summary
-   lists every pending file and its SHA-256), then again to apply it. The plan
-   refuses any pending migration without a byte-identical copy in
-   `VBTRNK/kut`; the apply job pushes only an identical list and checks
+   lists every pending file, its SHA-256 and its tool), then again to apply
+   it. The plan refuses any pending migration without a byte-identical copy in
+   a tool named by the dispatch: `VBTRNK/kut` always, `VBTRNK/cnc` only with
+   `cnc_ref`. The apply job pushes only an identical list and checks
    nothing is left pending. With nothing pending, the plan reports "up to date"
    and the apply job is skipped.
 
 The workflow checks out the exact commit, so the old "`git pull` before
-`db push`" trap no longer applies. Another tool's migrations need their own
-route. A local `npx supabase db push` from this repository stays a fallback
+`db push`" trap no longer applies. Another tool joins by adding its own
+`<tool>_ref` input the same way. A local `npx supabase db push` from this repository stays a fallback
 only, with the owner's explicit OK for that push.
 
 Individual tool repositories must never attempt to deploy their migrations to
