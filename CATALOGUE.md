@@ -1828,7 +1828,11 @@ bumps the "Latest applied migration" line in `CLAUDE.md`.
   KUT #353 merged as `c2695ba811aada7c305e530917e08d7c4e7b6848`.
   **Rollback:** re-create `kut._mm_simulate` from `20261016000000`. Weeks
   simulated in between keep their stored brackets.
-- `20261118120000_cnc_saves.sql` (**catalogued, not yet applied**; Crime &
+- `20261118120000_cnc_saves.sql` (**applied 2026-11-18** by `apply-migrations`
+  run 44416358154, catalogue `2fc85c2`, after a kut backup 7 minutes old; the
+  plan listed only this file, tool `cnc`; nothing pending afterwards. `cnc`
+  added to the Data API's exposed schemas the same day. Smoke passed through
+  the game's two functions; see VBTRNK/cnc#8. Crime &
   Crown, VBTRNK/cnc ADR-009, tracking issue VBTRNK/cnc#8). The first
   migration for schema `cnc`. No accounts and no auth change: a save is kept
   under a random cloud code, and the table `cnc.saves` stores only the code's

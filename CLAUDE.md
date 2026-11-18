@@ -51,9 +51,10 @@ Every catalogued migration, with its tier, backup, pre- and post-push
 [`CATALOGUE.md`](CATALOGUE.md). Add new entries there, never here, so this
 file stays orientation.
 
-**Latest applied migration:** KUT's `20261026000000_midweek_saved_byes.sql`
-(catalogue PR #100), applied 2026-10-23 by the `apply-migrations` workflow;
-nothing pending afterwards. Verification and rollback: CATALOGUE.md.
+**Latest applied migration:** Crime & Crown's `20261118120000_cnc_saves.sql`
+(catalogue PR #104), applied 2026-11-18 by the `apply-migrations` workflow
+(the first cnc migration, with `cnc_ref` from #105); nothing pending
+afterwards. Verification and rollback: CATALOGUE.md.
 
 ## Repo status
 
