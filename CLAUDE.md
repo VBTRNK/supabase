@@ -30,7 +30,8 @@ application code, and local database tests.
 
 ## Agent safety
 
-- Hooks in `.claude/hooks/` and `.codex/hooks/` block destructive shell
+- Hooks in `.claude/hooks/`, `.codex/hooks/` and `.agents/hooks/` block
+  destructive shell
   commands (forced deletes, force push, remote branch deletion, hard reset,
   forced clean, broad checkout discards, forced branch deletion, downloads
   piped into an interpreter). Changing a guard needs a PR the owner asked
